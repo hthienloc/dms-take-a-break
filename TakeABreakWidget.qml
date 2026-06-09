@@ -30,6 +30,29 @@ PluginComponent {
     pluginId: "takeABreak"
     pluginService: PluginService
 
+    IpcHandler {
+        target: "takeABreak"
+        
+        function preview(type: string): string {
+            if (type === "prewarning") {
+                pluginRoot.showPreWarning();
+                return "Showing pre-warning preview";
+            } else if (type === "overlay") {
+                pluginRoot.showBreakOverlay();
+                // Auto close preview after 5s
+                Qt.callLater(() => {
+                    const timer = Qt.createQmlObject("import QtQuick; Timer { interval: 5000; repeat: false; running: true }", pluginRoot, "previewOverlayTimer");
+                    timer.triggered.connect(function() {
+                        pluginRoot.closeBreakOverlay();
+                        timer.destroy();
+                    });
+                });
+                return "Showing overlay preview";
+            }
+            return "Usage: preview prewarning|overlay";
+        }
+    }
+
     // Timers
     Timer {
         id: sessionTimer

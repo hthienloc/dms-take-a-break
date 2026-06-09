@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import "./dms-common"
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import qs.Common
 import qs.Widgets
 import qs.Modules.Plugins
@@ -11,6 +12,16 @@ import qs.Services
 PluginSettings {
     id: rootSettings
     pluginId: "takeABreak"
+
+    Process {
+        id: previewPreWarningProc
+        command: ["dms", "ipc", "call", "takeABreak", "preview", "prewarning"]
+    }
+
+    Process {
+        id: previewOverlayProc
+        command: ["dms", "ipc", "call", "takeABreak", "preview", "overlay"]
+    }
 
     SettingsCard {
         SectionTitle {
@@ -93,6 +104,39 @@ PluginSettings {
             label: I18n.tr("Suppress during Meetings")
             description: I18n.tr("Automatically snooze breaks if your microphone is active.")
             defaultValue: true
+        }
+    }
+
+    SettingsCard {
+        SectionTitle {
+            text: I18n.tr("Testing & Preview")
+            icon: "preview"
+        }
+
+        Row {
+            width: parent.width - Theme.spacingM * 2
+            x: Theme.spacingM
+            spacing: Theme.spacingS
+
+            DankButton {
+                text: I18n.tr("Preview Pre-Warning")
+                iconName: "notifications"
+                backgroundColor: Theme.surfaceContainerHigh
+                textColor: Theme.surfaceText
+                width: (parent.width - parent.spacing) / 2
+                buttonHeight: 36
+                onClicked: previewPreWarningProc.running = true
+            }
+
+            DankButton {
+                text: I18n.tr("Preview Fullscreen Break")
+                iconName: "fullscreen"
+                backgroundColor: Theme.surfaceContainerHigh
+                textColor: Theme.surfaceText
+                width: (parent.width - parent.spacing) / 2
+                buttonHeight: 36
+                onClicked: previewOverlayProc.running = true
+            }
         }
     }
 
