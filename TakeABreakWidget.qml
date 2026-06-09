@@ -36,14 +36,17 @@ PluginComponent {
         
         function preview(type: string): string {
             if (type === "prewarning") {
+                pluginRoot.isPreWarning = true;
                 pluginRoot.showPreWarning();
                 return "Showing pre-warning preview";
             } else if (type === "overlay") {
+                pluginRoot.isBreakActive = true;
                 pluginRoot.showBreakOverlay();
                 // Auto close preview after 5s
                 Qt.callLater(() => {
                     const timer = Qt.createQmlObject("import QtQuick; Timer { interval: 5000; repeat: false; running: true }", pluginRoot, "previewOverlayTimer");
                     timer.triggered.connect(function() {
+                        pluginRoot.isBreakActive = false;
                         pluginRoot.closeBreakOverlay();
                         timer.destroy();
                     });
@@ -138,18 +141,20 @@ PluginComponent {
     }
 
     function skipBreak() {
-        if (pluginRoot.isPreWarning) {
+        if (pluginRoot.isPreWarning || (preWarningWindow && preWarningWindow.visible)) {
             pluginRoot.isPreWarning = false;
+            if (preWarningWindow) preWarningWindow.visible = false;
             pluginRoot.timeToNextBreak = pluginRoot.shortBreakInterval * 60; // reset
-        } else if (pluginRoot.isBreakActive) {
+        } else if (pluginRoot.isBreakActive || (overlayWindow && overlayWindow.visible)) {
             endBreak();
         }
     }
 
     function snoozeBreak() {
-        if (pluginRoot.isPreWarning) {
+        if (pluginRoot.isPreWarning || (preWarningWindow && preWarningWindow.visible)) {
             pluginRoot.isPreWarning = false;
-        } else if (pluginRoot.isBreakActive) {
+            if (preWarningWindow) preWarningWindow.visible = false;
+        } else if (pluginRoot.isBreakActive || (overlayWindow && overlayWindow.visible)) {
             pluginRoot.isBreakActive = false;
             closeBreakOverlay();
         }

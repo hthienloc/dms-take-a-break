@@ -109,6 +109,44 @@ PluginSettings {
 
     SettingsCard {
         SectionTitle {
+            text: I18n.tr("UI Appearance")
+            icon: "palette"
+        }
+
+        SelectionSettingPlus {
+            settingKey: "preWarningAlignment"
+            label: I18n.tr("Pre-warning Position")
+            description: I18n.tr("Where the pre-warning notification appears.")
+            options: [
+                { label: I18n.tr("Top Left"), value: "top-left" },
+                { label: I18n.tr("Top Center"), value: "top-center" },
+                { label: I18n.tr("Top Right"), value: "top-right" },
+                { label: I18n.tr("Bottom Left"), value: "bottom-left" },
+                { label: I18n.tr("Bottom Center"), value: "bottom-center" },
+                { label: I18n.tr("Bottom Right"), value: "bottom-right" },
+                { label: I18n.tr("Left Center"), value: "left-center" },
+                { label: I18n.tr("Right Center"), value: "right-center" }
+            ]
+            defaultValue: "bottom-right"
+        }
+
+        SettingsDivider {}
+
+        SliderSettingPlus {
+            settingKey: "overlayOpacity"
+            label: I18n.tr("Overlay Background Opacity")
+            description: I18n.tr("How transparent the fullscreen break background should be.")
+            defaultValue: 90
+            minimum: 50
+            maximum: 100
+            unit: "%"
+            leftLabel: "50%"
+            rightLabel: "100%"
+        }
+    }
+
+    SettingsCard {
+        SectionTitle {
             text: I18n.tr("Testing & Preview")
             icon: "preview"
         }

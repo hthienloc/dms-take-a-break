@@ -3,7 +3,7 @@
   "name": "Take a Break",
   "description": "A gentle companion that reminds you to rest your eyes with short and long breaks.",
   "version": "1.0.0",
-  "author": "loccun",
+  "author": "Loc Huynh",
   "icon": "self_improvement",
   "type": "daemon",
   "capabilities": [
