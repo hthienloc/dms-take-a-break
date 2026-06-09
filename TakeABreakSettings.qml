@@ -215,7 +215,7 @@ PluginSettings {
             settingKey: "overlayOpacity"
             label: I18n.tr("Overlay Background Opacity")
             description: I18n.tr("How transparent the fullscreen break background should be.")
-            defaultValue: 90
+            defaultValue: 100
             minimum: 50
             maximum: 100
             unit: "%"

@@ -40,7 +40,7 @@ Item {
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
             exclusionMode: ExclusionMode.Ignore
 
-            color: Theme.withAlpha(Theme.surface, (pluginRoot.pluginData.overlayOpacity ?? 90) / 100) // Dim background strongly
+            color: Theme.withAlpha(Theme.surface, (pluginRoot.pluginData.overlayOpacity ?? 100) / 100) // Dim background strongly
 
             Item {
                 id: safeArea
