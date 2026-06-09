@@ -194,6 +194,7 @@ PluginComponent {
 
     Component.onCompleted: {
         if (isDaemonInstance) {
+            PluginService.setGlobalVar(pluginId, "instance", pluginRoot);
             resetSession();
         }
     }

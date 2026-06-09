@@ -23,7 +23,12 @@ PluginSettings {
         command: ["dms", "ipc", "call", "takeABreak", "preview", "overlay"]
     }
 
-    property var livePlugin: PluginService.getPlugin("takeABreak")
+    PluginGlobalVar {
+        id: liveInstance
+        varName: "instance"
+    }
+
+    property var livePlugin: liveInstance.value
 
     SettingsCard {
         visible: livePlugin !== null
