@@ -137,16 +137,15 @@ PluginSettings {
         SettingsDivider {}
 
         SliderSettingPlus {
-            id: longBreakInterval
-            settingKey: "longBreakInterval"
-            label: I18n.tr("Long Break Interval")
-            description: I18n.tr("Time between long breaks.")
-            defaultValue: 60
-            minimum: 30
-            maximum: 180
-            unit: "m"
-            leftLabel: "30m"
-            rightLabel: "3h"
+            settingKey: "shortBreaksBeforeLong"
+            label: I18n.tr("Short breaks before long break")
+            description: I18n.tr("Number of short breaks to complete before a long break is triggered.")
+            defaultValue: 3
+            minimum: 1
+            maximum: 10
+            unit: ""
+            leftLabel: "1"
+            rightLabel: "10"
         }
 
         SliderSettingPlus {

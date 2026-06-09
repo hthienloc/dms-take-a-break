@@ -18,7 +18,7 @@ git clone https://github.com/hthienloc/dms-take-a-break ~/.config/DankMaterialSh
 
 ## Features
 
-- **20-20-20 Rule** - Automated reminders for short eye-rests and longer physical breaks.
+- **Break Cycles** - Automated reminders for short eye-rests and configurable long physical breaks after a set number of short breaks.
 - **Pre-warning Toast** - Subtle notification 10 seconds before a break to Snooze or Skip.
 - **Fullscreen Overlay** - Immersive break experience with health tips and a countdown timer.
 - **Smart Suppression** - Automatically delays breaks if you are in a fullscreen app or game.

@@ -12,9 +12,10 @@ PluginComponent {
 
     property int shortBreakInterval: pluginData.shortBreakInterval ?? 20 // minutes
     property int shortBreakDuration: pluginData.shortBreakDuration ?? 20 // seconds
-    property int longBreakInterval: pluginData.longBreakInterval ?? 60 // minutes
+    property int shortBreaksBeforeLong: pluginData.shortBreaksBeforeLong ?? 3 // count
     property int longBreakDuration: pluginData.longBreakDuration ?? 5 // minutes
 
+    property int completedShortBreaks: 0
     property bool suppressFullscreen: pluginData.suppressFullscreen ?? true
     property bool suppressMeetings: pluginData.suppressMeetings ?? true
 
@@ -111,6 +112,7 @@ PluginComponent {
     }
 
     function resetSession() {
+        pluginRoot.completedShortBreaks = 0;
         pluginRoot.nextBreakType = 1; // Start with short break
         pluginRoot.timeToNextBreak = pluginRoot.shortBreakInterval * 60;
         sessionTimer.restart();
@@ -129,15 +131,20 @@ PluginComponent {
     function endBreak() {
         pluginRoot.isBreakActive = false;
         closeBreakOverlay();
-        // Toggle next break type (simplified: every N short breaks = 1 long break)
-        // For now just toggle between them
+        
         if (pluginRoot.nextBreakType === 1) {
+            pluginRoot.completedShortBreaks++;
+        } else {
+            pluginRoot.completedShortBreaks = 0;
+        }
+
+        if (pluginRoot.completedShortBreaks >= pluginRoot.shortBreaksBeforeLong) {
             pluginRoot.nextBreakType = 2;
-            pluginRoot.timeToNextBreak = pluginRoot.longBreakInterval * 60;
         } else {
             pluginRoot.nextBreakType = 1;
-            pluginRoot.timeToNextBreak = pluginRoot.shortBreakInterval * 60;
         }
+        
+        pluginRoot.timeToNextBreak = pluginRoot.shortBreakInterval * 60;
     }
 
     function skipBreak() {
