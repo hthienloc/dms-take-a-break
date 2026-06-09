@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 
+import "./dms-common"
 import QtQuick
 import Quickshell
 import qs.Common
