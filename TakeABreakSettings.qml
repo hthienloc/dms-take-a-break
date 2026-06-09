@@ -23,12 +23,23 @@ PluginSettings {
         command: ["dms", "ipc", "call", "takeABreak", "preview", "overlay"]
     }
 
-    PluginGlobalVar {
-        id: liveInstance
-        varName: "instance"
+    property var livePlugin: null
+
+    Timer {
+        interval: 1000
+        running: livePlugin === null
+        repeat: true
+        onTriggered: livePlugin = PluginService.getGlobalVar("takeABreak", "instance")
     }
 
-    property var livePlugin: liveInstance.value
+    Component.onCompleted: {
+        livePlugin = PluginService.getGlobalVar("takeABreak", "instance");
+        PluginService.globalVarChanged.connect((pid, vname) => {
+            if (pid === "takeABreak" && vname === "instance") {
+                livePlugin = PluginService.getGlobalVar("takeABreak", "instance");
+            }
+        });
+    }
 
     SettingsCard {
         visible: livePlugin !== null
