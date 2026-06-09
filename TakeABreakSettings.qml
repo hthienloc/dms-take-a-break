@@ -23,6 +23,69 @@ PluginSettings {
         command: ["dms", "ipc", "call", "takeABreak", "preview", "overlay"]
     }
 
+    property var livePlugin: PluginService.getPlugin("takeABreak")
+
+    SettingsCard {
+        visible: livePlugin !== null
+        
+        StatusDisplay {
+            large: true
+            iconName: livePlugin ? (livePlugin.isPaused ? "pause_circle" : "timer") : ""
+            title: {
+                if (!livePlugin) return "";
+                if (livePlugin.isPaused) return I18n.tr("Paused");
+                if (livePlugin.isBreakActive) return livePlugin.nextBreakType === 1 ? I18n.tr("Short Break Active") : I18n.tr("Long Break Active");
+                return livePlugin.nextBreakType === 1 ? I18n.tr("Next: Short Break") : I18n.tr("Next: Long Break");
+            }
+            subtitle: {
+                if (!livePlugin) return "0:00";
+                let total = livePlugin.isBreakActive ? livePlugin.breakTimeRemaining : livePlugin.timeToNextBreak;
+                let m = Math.floor(total / 60);
+                let s = total % 60;
+                return `${m}:${s < 10 ? '0' : ''}${s}`;
+            }
+            active: livePlugin ? livePlugin.isBreakActive : false
+            progress: {
+                if (!livePlugin) return -1;
+                if (livePlugin.isBreakActive) {
+                    let duration = livePlugin.nextBreakType === 1 ? livePlugin.shortBreakDuration : livePlugin.longBreakDuration * 60;
+                    return livePlugin.breakTimeRemaining / duration;
+                } else {
+                    let interval = livePlugin.nextBreakType === 1 ? livePlugin.shortBreakInterval * 60 : livePlugin.longBreakInterval * 60;
+                    return 1 - (livePlugin.timeToNextBreak / interval);
+                }
+            }
+        }
+
+        Item { width: 1; height: Theme.spacingS }
+
+        Row {
+            width: parent.width - Theme.spacingM * 2
+            x: Theme.spacingM
+            spacing: Theme.spacingS
+
+            DankButton {
+                text: livePlugin && livePlugin.isPaused ? I18n.tr("Resume") : I18n.tr("Pause")
+                iconName: livePlugin && livePlugin.isPaused ? "play_arrow" : "pause"
+                backgroundColor: Theme.surfaceContainerHigh
+                textColor: Theme.surfaceText
+                width: (parent.width - parent.spacing) / 2
+                buttonHeight: 36
+                onClicked: if (livePlugin) livePlugin.isPaused = !livePlugin.isPaused
+            }
+
+            DankButton {
+                text: I18n.tr("Reset Session")
+                iconName: "refresh"
+                backgroundColor: Theme.surfaceContainerHigh
+                textColor: Theme.surfaceText
+                width: (parent.width - parent.spacing) / 2
+                buttonHeight: 36
+                onClicked: if (livePlugin) livePlugin.resetSession()
+            }
+        }
+    }
+
     SettingsCard {
         SectionTitle {
             text: I18n.tr("Break Intervals")
