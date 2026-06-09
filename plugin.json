@@ -1,0 +1,19 @@
+{
+  "id": "takeABreak",
+  "name": "Take a Break",
+  "description": "A gentle companion that reminds you to rest your eyes with short and long breaks.",
+  "version": "1.0.0",
+  "author": "loccun",
+  "icon": "self_improvement",
+  "type": "daemon",
+  "capabilities": [
+    "control-center"
+  ],
+  "component": "./TakeABreakWidget.qml",
+  "settings": "./TakeABreakSettings.qml",
+  "permissions": [
+    "settings_read",
+    "settings_write",
+    "audio_read"
+  ]
+}
