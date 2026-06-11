@@ -117,7 +117,6 @@ PluginSettings {
             id: shortBreakInterval
             settingKey: "shortBreakInterval"
             label: I18n.tr("Short Break Interval")
-            description: I18n.tr("Time between short breaks (20-20-20 rule).")
             defaultValue: 20
             minimum: 5
             maximum: 60
@@ -143,7 +142,6 @@ PluginSettings {
         SliderSettingPlus {
             settingKey: "shortBreaksBeforeLong"
             label: I18n.tr("Short breaks before long break")
-            description: I18n.tr("Number of short breaks to complete before a long break is triggered.")
             defaultValue: 3
             minimum: 1
             maximum: 10
