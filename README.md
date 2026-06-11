@@ -62,7 +62,7 @@ Use `dms ipc call takeABreak <command>` to control the plugin from scripts or ke
 GPL-3.0
 
 ## Roadmap / TODO
-- [ ] **Meeting Detection:** Automatically detect active microphone usage to snooze breaks during calls.
+- [x] **Meeting Detection:** Automatically detect active microphone usage to snooze breaks during calls.
 - [ ] **Sound Alerts:** Optional gentle chimes to signal the start and end of a break.
 - [ ] **Custom Tips:** Allow users to add their own text or images to the break overlay.
 - [ ] **Statistics:** Track and display your daily break completion rate.

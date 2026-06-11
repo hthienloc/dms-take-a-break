@@ -1,4 +1,5 @@
 import QtQuick
+import QtMultimedia
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -17,6 +18,9 @@ PluginComponent {
 
     property int preWarningTime: pluginData.preWarningTime ?? 10 // seconds
     property real preWarningOpacity: (pluginData.preWarningOpacity ?? 100) / 100
+
+    property bool soundEnabled: pluginData.soundEnabled ?? true
+    property real soundVolume: (pluginData.soundVolume ?? 80) / 100
 
     property int completedShortBreaks: 0
     property bool suppressFullscreen: pluginData.suppressFullscreen ?? true
@@ -86,6 +90,30 @@ PluginComponent {
             }
             return "Usage: preview prewarning|overlay";
         }
+
+        function play_sound(type: string): string {
+            pluginRoot.playSound(type || "start");
+            return "Playing sound: " + (type || "start");
+        }
+    }
+
+    // Audio
+    MediaPlayer {
+        id: alertPlayer
+        audioOutput: AudioOutput {
+            volume: pluginRoot.soundVolume
+        }
+    }
+
+    function playSound(type) {
+        if (!pluginRoot.soundEnabled || !AudioService.soundsAvailable) return;
+        
+        if (type === "start") {
+            alertPlayer.source = AudioService.getSoundPath("message");
+        } else {
+            alertPlayer.source = AudioService.getSoundPath("audio-volume-change");
+        }
+        alertPlayer.play();
     }
 
     // Timers
@@ -171,11 +199,13 @@ PluginComponent {
             pluginRoot.breakTimeRemaining = pluginRoot.longBreakDuration * 60;
         }
         showBreakOverlay();
+        playSound("start");
     }
 
     function endBreak() {
         pluginRoot.isBreakActive = false;
         closeBreakOverlay();
+        playSound("end");
         
         if (pluginRoot.nextBreakType === 1) {
             pluginRoot.completedShortBreaks++;
