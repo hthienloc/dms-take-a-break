@@ -106,8 +106,10 @@ PluginComponent {
     }
 
     function playSound(type) {
-        if (!pluginRoot.soundEnabled || !AudioService.soundsAvailable) return;
+        if (!pluginRoot.soundEnabled) return;
+        if (typeof AudioService === "undefined" || !AudioService || !AudioService.soundsAvailable) return;
         
+        alertPlayer.stop();
         if (type === "start") {
             alertPlayer.source = AudioService.getSoundPath("message");
         } else {
