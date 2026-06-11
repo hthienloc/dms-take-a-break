@@ -23,6 +23,11 @@ PluginSettings {
         command: ["dms", "ipc", "call", "takeABreak", "preview", "overlay"]
     }
 
+    Process {
+        id: previewSoundProc
+        command: ["dms", "ipc", "call", "takeABreak", "play_sound", "start"]
+    }
+
     property var livePlugin: null
 
     Timer {
@@ -112,7 +117,6 @@ PluginSettings {
             id: shortBreakInterval
             settingKey: "shortBreakInterval"
             label: I18n.tr("Short Break Interval")
-            description: I18n.tr("Time between short breaks (20-20-20 rule).")
             defaultValue: 20
             minimum: 5
             maximum: 60
@@ -138,7 +142,6 @@ PluginSettings {
         SliderSettingPlus {
             settingKey: "shortBreaksBeforeLong"
             label: I18n.tr("Short breaks before long break")
-            description: I18n.tr("Number of short breaks to complete before a long break is triggered.")
             defaultValue: 3
             minimum: 1
             maximum: 10
@@ -204,6 +207,33 @@ PluginSettings {
 
     SettingsCard {
         SectionTitle {
+            text: I18n.tr("Sound Alerts")
+            icon: "volume_up"
+        }
+
+        ToggleSettingPlus {
+            settingKey: "soundEnabled"
+            label: I18n.tr("Enable Sound Alerts")
+            description: I18n.tr("Play a gentle sound when a break starts and ends.")
+            defaultValue: true
+        }
+
+        SettingsDivider {}
+
+        SliderSettingPlus {
+            settingKey: "soundVolume"
+            label: I18n.tr("Alert Volume")
+            defaultValue: 80
+            minimum: 0
+            maximum: 100
+            unit: "%"
+            leftLabel: "0%"
+            rightLabel: "100%"
+        }
+    }
+
+    SettingsCard {
+        SectionTitle {
             text: I18n.tr("UI Appearance")
             icon: "palette"
         }
@@ -260,29 +290,44 @@ PluginSettings {
             icon: "preview"
         }
 
-        Row {
+        Column {
             width: parent.width - Theme.spacingM * 2
             x: Theme.spacingM
             spacing: Theme.spacingS
 
-            DankButton {
-                text: (livePlugin && livePlugin.isPreWarning) ? I18n.tr("Hide Pre-Warning") : I18n.tr("Preview Pre-Warning")
-                iconName: (livePlugin && livePlugin.isPreWarning) ? "notifications_off" : "notifications"
-                backgroundColor: (livePlugin && livePlugin.isPreWarning) ? Theme.primaryContainer : Theme.surfaceContainerHigh
-                textColor: (livePlugin && livePlugin.isPreWarning) ? Theme.primary : Theme.surfaceText
-                width: (parent.width - parent.spacing) / 2
-                buttonHeight: 36
-                onClicked: previewPreWarningProc.running = true
+            Row {
+                width: parent.width
+                spacing: Theme.spacingS
+
+                DankButton {
+                    text: (livePlugin && livePlugin.isPreWarning) ? I18n.tr("Hide Pre-Warning") : I18n.tr("Preview Pre-Warning")
+                    iconName: (livePlugin && livePlugin.isPreWarning) ? "notifications_off" : "notifications"
+                    backgroundColor: (livePlugin && livePlugin.isPreWarning) ? Theme.primaryContainer : Theme.surfaceContainerHigh
+                    textColor: (livePlugin && livePlugin.isPreWarning) ? Theme.primary : Theme.surfaceText
+                    width: (parent.width - parent.spacing) / 2
+                    buttonHeight: 36
+                    onClicked: previewPreWarningProc.running = true
+                }
+
+                DankButton {
+                    text: (livePlugin && livePlugin.isBreakActive) ? I18n.tr("Hide Overlay") : I18n.tr("Preview Fullscreen Break")
+                    iconName: (livePlugin && livePlugin.isBreakActive) ? "fullscreen_exit" : "fullscreen"
+                    backgroundColor: (livePlugin && livePlugin.isBreakActive) ? Theme.primaryContainer : Theme.surfaceContainerHigh
+                    textColor: (livePlugin && livePlugin.isBreakActive) ? Theme.primary : Theme.surfaceText
+                    width: (parent.width - parent.spacing) / 2
+                    buttonHeight: 36
+                    onClicked: previewOverlayProc.running = true
+                }
             }
 
             DankButton {
-                text: (livePlugin && livePlugin.isBreakActive) ? I18n.tr("Hide Overlay") : I18n.tr("Preview Fullscreen Break")
-                iconName: (livePlugin && livePlugin.isBreakActive) ? "fullscreen_exit" : "fullscreen"
-                backgroundColor: (livePlugin && livePlugin.isBreakActive) ? Theme.primaryContainer : Theme.surfaceContainerHigh
-                textColor: (livePlugin && livePlugin.isBreakActive) ? Theme.primary : Theme.surfaceText
-                width: (parent.width - parent.spacing) / 2
+                text: I18n.tr("Test Alert Sound")
+                iconName: "volume_up"
+                backgroundColor: Theme.surfaceContainerHigh
+                textColor: Theme.surfaceText
+                width: parent.width
                 buttonHeight: 36
-                onClicked: previewOverlayProc.running = true
+                onClicked: previewSoundProc.running = true
             }
         }
     }

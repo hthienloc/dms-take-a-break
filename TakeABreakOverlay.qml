@@ -78,6 +78,7 @@ Item {
                         }
                         font.pixelSize: 120
                         font.weight: Font.Bold
+                        font.family: "monospace"
                         color: Theme.primary
                         anchors.horizontalCenter: parent.horizontalCenter
                     }
