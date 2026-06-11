@@ -35,6 +35,22 @@ PluginComponent {
     pluginId: "takeABreak"
     pluginService: PluginService
 
+    // Control Center Integration
+    ccWidgetIcon: "self_improvement"
+    ccWidgetPrimaryText: I18n.tr("Take a Break")
+    ccWidgetSecondaryText: {
+        if (pluginRoot.isPaused) return I18n.tr("Paused");
+        
+        let total = pluginRoot.isBreakActive ? pluginRoot.breakTimeRemaining : pluginRoot.timeToNextBreak;
+        let m = Math.floor(total / 60);
+        let s = total % 60;
+        let timeStr = `${m}:${s < 10 ? '0' : ''}${s}`;
+        
+        return pluginRoot.isBreakActive ? I18n.tr("Active: ") + timeStr : timeStr;
+    }
+    ccWidgetIsActive: !pluginRoot.isPaused
+    onCcWidgetToggled: pluginRoot.isPaused = !pluginRoot.isPaused
+
     IpcHandler {
         target: "takeABreak"
         
