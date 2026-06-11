@@ -125,7 +125,6 @@ PluginSettings {
             id: shortBreakDuration
             settingKey: "shortBreakDuration"
             label: I18n.tr("Short Break Duration")
-            description: I18n.tr("How long a short break lasts.")
             defaultValue: 20
             minimum: 5
             maximum: 120
@@ -152,13 +151,31 @@ PluginSettings {
             id: longBreakDuration
             settingKey: "longBreakDuration"
             label: I18n.tr("Long Break Duration")
-            description: I18n.tr("How long a long break lasts.")
             defaultValue: 5
             minimum: 1
             maximum: 30
             unit: "m"
             leftLabel: "1m"
             rightLabel: "30m"
+        }
+    }
+
+    SettingsCard {
+        SectionTitle {
+            text: I18n.tr("Break Timing")
+            icon: "schedule"
+        }
+
+        SliderSettingPlus {
+            settingKey: "preWarningTime"
+            label: I18n.tr("Pre-break Warning Timing")
+            description: I18n.tr("How many seconds before the break to show the warning notification.")
+            defaultValue: 10
+            minimum: 5
+            maximum: 60
+            unit: "s"
+            leftLabel: "5s"
+            rightLabel: "1m"
         }
     }
 
@@ -211,6 +228,20 @@ PluginSettings {
         SettingsDivider {}
 
         SliderSettingPlus {
+            settingKey: "preWarningOpacity"
+            label: I18n.tr("Pre-warning Opacity")
+            description: I18n.tr("How transparent the pre-warning notification should be.")
+            defaultValue: 100
+            minimum: 20
+            maximum: 100
+            unit: "%"
+            leftLabel: "20%"
+            rightLabel: "100%"
+        }
+
+        SettingsDivider {}
+
+        SliderSettingPlus {
             settingKey: "overlayOpacity"
             label: I18n.tr("Overlay Background Opacity")
             description: I18n.tr("How transparent the fullscreen break background should be.")
@@ -235,20 +266,20 @@ PluginSettings {
             spacing: Theme.spacingS
 
             DankButton {
-                text: I18n.tr("Preview Pre-Warning")
-                iconName: "notifications"
-                backgroundColor: Theme.surfaceContainerHigh
-                textColor: Theme.surfaceText
+                text: (livePlugin && livePlugin.isPreWarning) ? I18n.tr("Hide Pre-Warning") : I18n.tr("Preview Pre-Warning")
+                iconName: (livePlugin && livePlugin.isPreWarning) ? "notifications_off" : "notifications"
+                backgroundColor: (livePlugin && livePlugin.isPreWarning) ? Theme.primaryContainer : Theme.surfaceContainerHigh
+                textColor: (livePlugin && livePlugin.isPreWarning) ? Theme.primary : Theme.surfaceText
                 width: (parent.width - parent.spacing) / 2
                 buttonHeight: 36
                 onClicked: previewPreWarningProc.running = true
             }
 
             DankButton {
-                text: I18n.tr("Preview Fullscreen Break")
-                iconName: "fullscreen"
-                backgroundColor: Theme.surfaceContainerHigh
-                textColor: Theme.surfaceText
+                text: (livePlugin && livePlugin.isBreakActive) ? I18n.tr("Hide Overlay") : I18n.tr("Preview Fullscreen Break")
+                iconName: (livePlugin && livePlugin.isBreakActive) ? "fullscreen_exit" : "fullscreen"
+                backgroundColor: (livePlugin && livePlugin.isBreakActive) ? Theme.primaryContainer : Theme.surfaceContainerHigh
+                textColor: (livePlugin && livePlugin.isBreakActive) ? Theme.primary : Theme.surfaceText
                 width: (parent.width - parent.spacing) / 2
                 buttonHeight: 36
                 onClicked: previewOverlayProc.running = true

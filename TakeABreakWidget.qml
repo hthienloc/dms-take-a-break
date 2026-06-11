@@ -15,6 +15,9 @@ PluginComponent {
     property int shortBreaksBeforeLong: pluginData.shortBreaksBeforeLong ?? 3 // count
     property int longBreakDuration: pluginData.longBreakDuration ?? 5 // minutes
 
+    property int preWarningTime: pluginData.preWarningTime ?? 10 // seconds
+    property real preWarningOpacity: (pluginData.preWarningOpacity ?? 100) / 100
+
     property int completedShortBreaks: 0
     property bool suppressFullscreen: pluginData.suppressFullscreen ?? true
     property bool suppressMeetings: pluginData.suppressMeetings ?? true
@@ -37,21 +40,22 @@ PluginComponent {
         
         function preview(type: string): string {
             if (type === "prewarning") {
+                if (pluginRoot.isPreWarning && preWarningWindow && preWarningWindow.visible) {
+                    pluginRoot.isPreWarning = false;
+                    preWarningWindow.visible = false;
+                    return "Hiding pre-warning preview";
+                }
                 pluginRoot.isPreWarning = true;
                 pluginRoot.showPreWarning();
                 return "Showing pre-warning preview";
             } else if (type === "overlay") {
+                if (pluginRoot.isBreakActive && overlayWindow && overlayWindow.visible) {
+                    pluginRoot.isBreakActive = false;
+                    pluginRoot.closeBreakOverlay();
+                    return "Hiding overlay preview";
+                }
                 pluginRoot.isBreakActive = true;
                 pluginRoot.showBreakOverlay();
-                // Auto close preview after 5s
-                Qt.callLater(() => {
-                    const timer = Qt.createQmlObject("import QtQuick; Timer { interval: 5000; repeat: false; running: true }", pluginRoot, "previewOverlayTimer");
-                    timer.triggered.connect(function() {
-                        pluginRoot.isBreakActive = false;
-                        pluginRoot.closeBreakOverlay();
-                        timer.destroy();
-                    });
-                });
                 return "Showing overlay preview";
             }
             return "Usage: preview prewarning|overlay";
@@ -67,8 +71,8 @@ PluginComponent {
         onTriggered: {
             pluginRoot.timeToNextBreak -= 1;
             
-            if (pluginRoot.timeToNextBreak == 10 && !pluginRoot.isPreWarning) {
-                // Show pre-warning 10s before
+            if (pluginRoot.timeToNextBreak == pluginRoot.preWarningTime && !pluginRoot.isPreWarning) {
+                // Show pre-warning X seconds before
                 if (shouldSuppress()) {
                     // Snooze for 5 minutes
                     pluginRoot.timeToNextBreak += 300;
@@ -107,8 +111,23 @@ PluginComponent {
                 }
             }
         }
-        // TODO: Meeting detection via microphone
+
+        if (pluginRoot.suppressMeetings && PrivacyService.microphoneActive) {
+            return true;
+        }
+
         return false;
+    }
+
+    Connections {
+        target: PrivacyService
+        function onMicrophoneActiveChanged() {
+            if (PrivacyService.microphoneActive && pluginRoot.suppressMeetings) {
+                if (pluginRoot.isPreWarning || pluginRoot.isBreakActive) {
+                    pluginRoot.snoozeBreak();
+                }
+            }
+        }
     }
 
     function resetSession() {

@@ -132,6 +132,7 @@ PanelWindow {
         anchors.fill: parent
         radius: Theme.cornerRadius
         color: Theme.surfaceContainerHighest
+        opacity: pluginRoot.preWarningOpacity
         border.color: Theme.outline
         border.width: 1
 
