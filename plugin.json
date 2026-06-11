@@ -5,11 +5,18 @@
   "version": "1.2.0",
   "author": "Loc Huynh",
   "icon": "self_improvement",
-  "type": "daemon",
+  "type": [
+    "daemon",
+    "widget"
+  ],
   "capabilities": [
     "control-center",
     "ipc"
   ],
+  "components": {
+    "daemon": "./TakeABreakWidget.qml",
+    "widget": "./TakeABreakWidget.qml"
+  },
   "component": "./TakeABreakWidget.qml",
   "settings": "./TakeABreakSettings.qml",
   "permissions": [
