@@ -16,7 +16,7 @@ PluginComponent {
     property int shortBreaksBeforeLong: pluginData.shortBreaksBeforeLong ?? 3 // count
     property int longBreakDuration: pluginData.longBreakDuration ?? 5 // minutes
 
-    property int preWarningTime: pluginData.preWarningTime ?? 10 // seconds
+    property int preWarningTime: pluginData.preWarningTime ?? 5 // seconds
     property real preWarningOpacity: (pluginData.preWarningOpacity ?? 100) / 100
 
     property bool soundEnabled: pluginData.soundEnabled ?? true
