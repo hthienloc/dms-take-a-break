@@ -173,7 +173,7 @@ PluginSettings {
             settingKey: "preWarningTime"
             label: I18n.tr("Pre-break Warning Timing")
             description: I18n.tr("How many seconds before the break to show the warning notification.")
-            defaultValue: 10
+            defaultValue: 5
             minimum: 0
             maximum: 15
             unit: "s"
