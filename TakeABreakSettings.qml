@@ -34,14 +34,19 @@ PluginSettings {
         interval: 1000
         running: livePlugin === null
         repeat: true
-        onTriggered: livePlugin = PluginService.getGlobalVar("takeABreak", "instance")
+        onTriggered: {
+            livePlugin = PluginService.getGlobalVar("takeABreak", "instance");
+            if (livePlugin && livePlugin.getStats) livePlugin.getStats();
+        }
     }
 
     Component.onCompleted: {
         livePlugin = PluginService.getGlobalVar("takeABreak", "instance");
+        if (livePlugin && livePlugin.getStats) livePlugin.getStats();
         PluginService.globalVarChanged.connect((pid, vname) => {
             if (pid === "takeABreak" && vname === "instance") {
                 livePlugin = PluginService.getGlobalVar("takeABreak", "instance");
+                if (livePlugin && livePlugin.getStats) livePlugin.getStats();
             }
         });
     }
@@ -281,6 +286,114 @@ PluginSettings {
             unit: "%"
             leftLabel: "50%"
             rightLabel: "100%"
+        }
+    }
+
+    Process {
+        id: resetStatsProc
+        command: ["sh", "-c", "rm -f \"$HOME/.local/share/dms-take-a-break/stats.json\""]
+        onExited: {
+            if (livePlugin && livePlugin.getStats) livePlugin.getStats();
+        }
+    }
+
+    Timer {
+        id: statsRefreshTimer
+        interval: 10000
+        running: livePlugin !== null
+        repeat: true
+        onTriggered: {
+            if (livePlugin && livePlugin.getStats) livePlugin.getStats();
+        }
+    }
+
+    SettingsCard {
+        SectionTitle {
+            text: I18n.tr("Statistics")
+            icon: "bar_chart"
+        }
+
+        Column {
+            width: parent.width - Theme.spacingM * 2
+            x: Theme.spacingM
+            spacing: Theme.spacingS
+
+            Row {
+                width: parent.width
+                spacing: Theme.spacingS
+
+                InfoTile {
+                    width: (parent.width - parent.spacing) / 2
+                    label: I18n.tr("Today")
+                    value: {
+                        var s = livePlugin ? livePlugin._stats : null;
+                        if (!s || s.todayRate < 0) return I18n.tr("No data");
+                        return s.todayCompleted + "/" + s.todayTotal + " (" + s.todayRate + "%)";
+                    }
+                    iconName: "today"
+                    accentColor: {
+                        var s = livePlugin ? livePlugin._stats : null;
+                        if (!s || s.todayRate < 0) return Theme.primary;
+                        return s.todayRate >= 80 ? Theme.success : (s.todayRate >= 50 ? Theme.warning : Theme.error);
+                    }
+                }
+
+                InfoTile {
+                    width: (parent.width - parent.spacing) / 2
+                    label: I18n.tr("This Week")
+                    value: {
+                        var s = livePlugin ? livePlugin._stats : null;
+                        if (!s || s.weekRate < 0) return I18n.tr("No data");
+                        return s.weekCompleted + "/" + s.weekTotal + " (" + s.weekRate + "%)";
+                    }
+                    iconName: "date_range"
+                    accentColor: {
+                        var s = livePlugin ? livePlugin._stats : null;
+                        if (!s || s.weekRate < 0) return Theme.primary;
+                        return s.weekRate >= 80 ? Theme.success : (s.weekRate >= 50 ? Theme.warning : Theme.error);
+                    }
+                }
+            }
+
+            InfoTile {
+                width: parent.width
+                label: I18n.tr("Total Breaks Logged")
+                value: {
+                    var s = livePlugin ? livePlugin._stats : null;
+                    return s ? String(s.totalAll) : I18n.tr("No data");
+                }
+                iconName: "analytics"
+                accentColor: Theme.primary
+            }
+
+            Row {
+                width: parent.width
+                spacing: Theme.spacingS
+
+                DankButton {
+                    text: I18n.tr("Refresh")
+                    iconName: "refresh"
+                    backgroundColor: Theme.surfaceContainerHigh
+                    textColor: Theme.surfaceText
+                    width: (parent.width - parent.spacing) / 2
+                    buttonHeight: 32
+                    onClicked: {
+                        if (livePlugin && livePlugin.getStats) livePlugin.getStats();
+                    }
+                }
+
+                DankButton {
+                    text: I18n.tr("Reset Stats")
+                    iconName: "delete_sweep"
+                    backgroundColor: Theme.errorContainer
+                    textColor: Theme.onErrorContainer
+                    width: (parent.width - parent.spacing) / 2
+                    buttonHeight: 32
+                    onClicked: {
+                        resetStatsProc.running = true;
+                    }
+                }
+            }
         }
     }
 
