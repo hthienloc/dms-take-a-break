@@ -72,29 +72,35 @@ PluginComponent {
                 var now = new Date();
                 var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000;
                 var weekStart = todayStart - 6 * 86400;
-                var todayTotal = 0, todayCompleted = 0, todaySkipped = 0;
-                var weekTotal = 0, weekCompleted = 0, weekSkipped = 0;
+                var todayTotal = 0, todayCompleted = 0, todaySkipped = 0, todaySnoozed = 0;
+                var weekTotal = 0, weekCompleted = 0, weekSkipped = 0, weekSnoozed = 0;
                 for (var i = 0; i < stats.events.length; i++) {
                     var e = stats.events[i];
                     if (e.ts >= todayStart) {
                         todayTotal++;
                         if (e.status === "completed") todayCompleted++;
                         else if (e.status === "skipped") todaySkipped++;
+                        else if (e.status === "snoozed") todaySnoozed++;
                     }
                     if (e.ts >= weekStart) {
                         weekTotal++;
                         if (e.status === "completed") weekCompleted++;
                         else if (e.status === "skipped") weekSkipped++;
+                        else if (e.status === "snoozed") weekSnoozed++;
                     }
                 }
+                var todayResponded = todayCompleted + todaySkipped + todaySnoozed;
+                var weekResponded = weekCompleted + weekSkipped + weekSnoozed;
                 pluginRoot._stats = {
-                    todayRate: todayTotal > 0 ? Math.round(todayCompleted / (todayCompleted + todaySkipped) * 100) : -1,
+                    todayRate: todayResponded > 0 ? Math.round(todayCompleted / todayResponded * 100) : -1,
                     todayCompleted: todayCompleted,
                     todaySkipped: todaySkipped,
+                    todaySnoozed: todaySnoozed,
                     todayTotal: todayTotal,
-                    weekRate: weekTotal > 0 ? Math.round(weekCompleted / (weekCompleted + weekSkipped) * 100) : -1,
+                    weekRate: weekResponded > 0 ? Math.round(weekCompleted / weekResponded * 100) : -1,
                     weekCompleted: weekCompleted,
                     weekSkipped: weekSkipped,
+                    weekSnoozed: weekSnoozed,
                     weekTotal: weekTotal,
                     totalAll: stats.events.length
                 };

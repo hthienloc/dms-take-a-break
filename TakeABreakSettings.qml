@@ -327,7 +327,7 @@ PluginSettings {
                     label: I18n.tr("Today")
                     value: {
                         var s = livePlugin ? livePlugin._stats : null;
-                        if (!s || s.todayRate < 0) return I18n.tr("No data");
+                        if (!s || s.todayRate < 0) return "—";
                         return s.todayCompleted + "/" + s.todayTotal + " (" + s.todayRate + "%)";
                     }
                     iconName: "today"
@@ -343,7 +343,7 @@ PluginSettings {
                     label: I18n.tr("This Week")
                     value: {
                         var s = livePlugin ? livePlugin._stats : null;
-                        if (!s || s.weekRate < 0) return I18n.tr("No data");
+                        if (!s || s.weekRate < 0) return "—";
                         return s.weekCompleted + "/" + s.weekTotal + " (" + s.weekRate + "%)";
                     }
                     iconName: "date_range"
@@ -355,15 +355,61 @@ PluginSettings {
                 }
             }
 
-            InfoTile {
+            Row {
                 width: parent.width
-                label: I18n.tr("Total Breaks Logged")
-                value: {
-                    var s = livePlugin ? livePlugin._stats : null;
-                    return s ? String(s.totalAll) : I18n.tr("No data");
+                spacing: Theme.spacingS
+
+                InfoTile {
+                    width: (parent.width - parent.spacing) / 2
+                    label: I18n.tr("Completed")
+                    value: {
+                        var s = livePlugin ? livePlugin._stats : null;
+                        if (!s || s.todayRate < 0) return "0";
+                        return s.todayCompleted + " / " + s.weekCompleted;
+                    }
+                    iconName: "check_circle"
+                    accentColor: Theme.success
                 }
-                iconName: "analytics"
-                accentColor: Theme.primary
+
+                InfoTile {
+                    width: (parent.width - parent.spacing) / 2
+                    label: I18n.tr("Skipped")
+                    value: {
+                        var s = livePlugin ? livePlugin._stats : null;
+                        if (!s || s.todayRate < 0) return "0";
+                        return s.todaySkipped + " / " + s.weekSkipped;
+                    }
+                    iconName: "skip_next"
+                    accentColor: Theme.warning
+                }
+            }
+
+            Row {
+                width: parent.width
+                spacing: Theme.spacingS
+
+                InfoTile {
+                    width: (parent.width - parent.spacing) / 2
+                    label: I18n.tr("Snoozed")
+                    value: {
+                        var s = livePlugin ? livePlugin._stats : null;
+                        if (!s || s.todayRate < 0) return "0";
+                        return I18n.tr("Today: ") + s.todaySnoozed + " — " + I18n.tr("Week: ") + s.weekSnoozed;
+                    }
+                    iconName: "snooze"
+                    accentColor: Theme.primary
+                }
+
+                InfoTile {
+                    width: (parent.width - parent.spacing) / 2
+                    label: I18n.tr("Total Breaks Logged")
+                    value: {
+                        var s = livePlugin ? livePlugin._stats : null;
+                        return s ? String(s.totalAll) : "0";
+                    }
+                    iconName: "analytics"
+                    accentColor: Theme.primary
+                }
             }
 
             Row {
@@ -386,7 +432,7 @@ PluginSettings {
                     text: I18n.tr("Reset Stats")
                     iconName: "delete_sweep"
                     backgroundColor: Theme.errorContainer
-                    textColor: Theme.onErrorContainer
+                    textColor: Theme.error
                     width: (parent.width - parent.spacing) / 2
                     buttonHeight: 32
                     onClicked: {
