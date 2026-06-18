@@ -39,6 +39,74 @@ PluginComponent {
     pluginId: "takeABreak"
     pluginService: PluginService
 
+    // ── Statistics ──────────────────────────────────────────────────────────
+    readonly property string statsFilePath: {
+        var home = Quickshell.env("HOME");
+        return home + "/.local/share/dms-take-a-break/stats.json";
+    }
+
+    function logEvent(status) {
+        var file = statsFilePath;
+        Proc.runCommand("takeABreak.readStats", ["sh", "-c",
+            "cat \"" + file + "\" 2>/dev/null || echo '{\"events\":[]}'"
+        ], (stdout) => {
+            var stats = JSON.parse(stdout);
+            var type = pluginRoot.nextBreakType === 1 ? "short" : "long";
+            var ts = Math.floor(Date.now() / 1000);
+            stats.events.push({ ts: ts, type: type, status: status });
+            var json = JSON.stringify(stats);
+            var escaped = json.replace(/\"/g, '\\"');
+            Proc.runCommand("takeABreak.writeStats", ["sh", "-c",
+                "mkdir -p \"$(dirname \"" + file + "\")\" && printf '%s' \"" + escaped + "\" > \"" + file + "\""
+            ]);
+        });
+    }
+
+    function getStats() {
+        var file = statsFilePath;
+        Proc.runCommand("takeABreak.readStats", ["sh", "-c",
+            "cat \"" + file + "\" 2>/dev/null || echo '{\"events\":[]}'"
+        ], (stdout) => {
+            try {
+                var stats = JSON.parse(stdout);
+                var now = new Date();
+                var todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000;
+                var weekStart = todayStart - 6 * 86400;
+                var todayTotal = 0, todayCompleted = 0, todaySkipped = 0;
+                var weekTotal = 0, weekCompleted = 0, weekSkipped = 0;
+                for (var i = 0; i < stats.events.length; i++) {
+                    var e = stats.events[i];
+                    if (e.ts >= todayStart) {
+                        todayTotal++;
+                        if (e.status === "completed") todayCompleted++;
+                        else if (e.status === "skipped") todaySkipped++;
+                    }
+                    if (e.ts >= weekStart) {
+                        weekTotal++;
+                        if (e.status === "completed") weekCompleted++;
+                        else if (e.status === "skipped") weekSkipped++;
+                    }
+                }
+                pluginRoot._stats = {
+                    todayRate: todayTotal > 0 ? Math.round(todayCompleted / (todayCompleted + todaySkipped) * 100) : -1,
+                    todayCompleted: todayCompleted,
+                    todaySkipped: todaySkipped,
+                    todayTotal: todayTotal,
+                    weekRate: weekTotal > 0 ? Math.round(weekCompleted / (weekCompleted + weekSkipped) * 100) : -1,
+                    weekCompleted: weekCompleted,
+                    weekSkipped: weekSkipped,
+                    weekTotal: weekTotal,
+                    totalAll: stats.events.length
+                };
+                if (typeof _onStatsReady === "function") _onStatsReady();
+            } catch (e) {
+                console.warn("[TakeABreak] Failed to parse stats:", e);
+            }
+        });
+    }
+    property var _stats: null
+    property var _onStatsReady: null
+
     readonly property var masterInstance: (isDaemonInstance) ? pluginRoot : PluginService.getGlobalVar(pluginId, "instance")
 
     // Control Center Integration
@@ -208,6 +276,7 @@ PluginComponent {
         pluginRoot.isBreakActive = false;
         closeBreakOverlay();
         playSound("end");
+        pluginRoot.logEvent("completed");
         
         if (pluginRoot.nextBreakType === 1) {
             pluginRoot.completedShortBreaks++;
@@ -226,15 +295,26 @@ PluginComponent {
 
     function skipBreak() {
         if (pluginRoot.isPreWarning || (preWarningWindow && preWarningWindow.visible)) {
+            pluginRoot.logEvent("skipped");
             pluginRoot.isPreWarning = false;
             if (preWarningWindow) preWarningWindow.visible = false;
-            pluginRoot.timeToNextBreak = pluginRoot.shortBreakInterval * 60; // reset
+            pluginRoot.timeToNextBreak = pluginRoot.shortBreakInterval * 60;
         } else if (pluginRoot.isBreakActive || (overlayWindow && overlayWindow.visible)) {
-            endBreak();
+            pluginRoot.logEvent("skipped");
+            pluginRoot.isBreakActive = false;
+            closeBreakOverlay();
+            pluginRoot.completedShortBreaks = pluginRoot.nextBreakType === 1 ? pluginRoot.completedShortBreaks + 1 : 0;
+            if (pluginRoot.completedShortBreaks >= pluginRoot.shortBreaksBeforeLong) {
+                pluginRoot.nextBreakType = 2;
+            } else {
+                pluginRoot.nextBreakType = 1;
+            }
+            pluginRoot.timeToNextBreak = pluginRoot.shortBreakInterval * 60;
         }
     }
 
     function snoozeBreak() {
+        pluginRoot.logEvent("snoozed");
         if (pluginRoot.isPreWarning || (preWarningWindow && preWarningWindow.visible)) {
             pluginRoot.isPreWarning = false;
             if (preWarningWindow) preWarningWindow.visible = false;
