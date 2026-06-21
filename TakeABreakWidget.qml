@@ -35,6 +35,8 @@ PluginComponent {
     property bool isPreWarning: false
     property bool isBreakActive: false
     property bool isPaused: pluginData.isPaused ?? false
+    property bool pauseMusic: pluginData.pauseMusic ?? false
+    property var pausedPlayers: []
 
     pluginId: "takeABreak"
     pluginService: PluginService
@@ -260,6 +262,32 @@ PluginComponent {
         }
     }
 
+    function pauseMusicPlayers() {
+        if (!pluginRoot.pauseMusic) return;
+        var playersToResume = [];
+        var available = MprisController.availablePlayers || [];
+        for (var i = 0; i < available.length; i++) {
+            var player = available[i];
+            if (player && player.isPlaying && player.canPause) {
+                playersToResume.push(player.identity);
+                player.pause();
+            }
+        }
+        pluginRoot.pausedPlayers = playersToResume;
+    }
+
+    function resumeMusicPlayers() {
+        if (!pluginRoot.pauseMusic || !pluginRoot.pausedPlayers || pluginRoot.pausedPlayers.length === 0) return;
+        var available = MprisController.availablePlayers || [];
+        for (var i = 0; i < available.length; i++) {
+            var player = available[i];
+            if (player && pluginRoot.pausedPlayers.indexOf(player.identity) !== -1 && player.canPlay) {
+                player.play();
+            }
+        }
+        pluginRoot.pausedPlayers = [];
+    }
+
     function resetSession() {
         pluginRoot.completedShortBreaks = 0;
         pluginRoot.nextBreakType = 1; // Start with short break
@@ -276,6 +304,7 @@ PluginComponent {
         }
         showBreakOverlay();
         playSound("start");
+        pauseMusicPlayers();
     }
 
     function endBreak() {
@@ -283,6 +312,7 @@ PluginComponent {
         closeBreakOverlay();
         playSound("end");
         pluginRoot.logEvent("completed");
+        resumeMusicPlayers();
         
         if (pluginRoot.nextBreakType === 1) {
             pluginRoot.completedShortBreaks++;
@@ -309,6 +339,7 @@ PluginComponent {
             pluginRoot.logEvent("skipped");
             pluginRoot.isBreakActive = false;
             closeBreakOverlay();
+            resumeMusicPlayers();
             pluginRoot.completedShortBreaks = pluginRoot.nextBreakType === 1 ? pluginRoot.completedShortBreaks + 1 : 0;
             if (pluginRoot.completedShortBreaks >= pluginRoot.shortBreaksBeforeLong) {
                 pluginRoot.nextBreakType = 2;
@@ -327,6 +358,7 @@ PluginComponent {
         } else if (pluginRoot.isBreakActive || (overlayWindow && overlayWindow.visible)) {
             pluginRoot.isBreakActive = false;
             closeBreakOverlay();
+            resumeMusicPlayers();
         }
         pluginRoot.timeToNextBreak = 300; // 5 minutes snooze
         sessionTimer.restart();

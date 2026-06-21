@@ -208,6 +208,14 @@ PluginSettings {
             description: I18n.tr("Automatically snooze breaks if your microphone is active.")
             defaultValue: true
         }
+
+        ToggleSettingPlus {
+            id: pauseMusic
+            settingKey: "pauseMusic"
+            label: I18n.tr("Pause Music during Break")
+            description: I18n.tr("Automatically pause active music players when a break starts, and resume them when the break ends.")
+            defaultValue: false
+        }
     }
 
     SettingsCard {
