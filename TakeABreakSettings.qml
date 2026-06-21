@@ -114,7 +114,7 @@ PluginSettings {
 
     SettingsCard {
         SectionTitle {
-            text: I18n.tr("Break Intervals")
+            text: I18n.tr("Break Schedule")
             icon: "timer"
         }
 
@@ -166,13 +166,8 @@ PluginSettings {
             leftLabel: "1m"
             rightLabel: "30m"
         }
-    }
 
-    SettingsCard {
-        SectionTitle {
-            text: I18n.tr("Break Timing")
-            icon: "schedule"
-        }
+        SettingsDivider {}
 
         SliderSettingPlus {
             settingKey: "preWarningTime"
@@ -208,6 +203,13 @@ PluginSettings {
             description: I18n.tr("Automatically snooze breaks if your microphone is active.")
             defaultValue: true
         }
+    }
+
+    SettingsCard {
+        SectionTitle {
+            text: I18n.tr("Audio & Playback")
+            icon: "volume_up"
+        }
 
         ToggleSettingPlus {
             id: pauseMusic
@@ -216,13 +218,8 @@ PluginSettings {
             description: I18n.tr("Automatically pause active music players when a break starts, and resume them when the break ends.")
             defaultValue: false
         }
-    }
 
-    SettingsCard {
-        SectionTitle {
-            text: I18n.tr("Sound Alerts")
-            icon: "volume_up"
-        }
+        SettingsDivider {}
 
         ToggleSettingPlus {
             settingKey: "soundEnabled"
