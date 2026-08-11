@@ -415,6 +415,13 @@ PluginComponent {
         }
     }
 
+    Component.onDestruction: {
+        if (pluginRoot.isActiveInstance && pluginRoot.pluginId !== "" &&
+            PluginService.getGlobalVar(pluginRoot.pluginId, "instance") === pluginRoot) {
+            PluginService.setGlobalVar(pluginRoot.pluginId, "instance", null);
+        }
+    }
+
     popoutContent: Component {
         Column {
             width: 300
