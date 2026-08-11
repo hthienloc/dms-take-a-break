@@ -26,10 +26,7 @@ PluginComponent {
     property bool suppressFullscreen: pluginData.suppressFullscreen ?? true
     property bool suppressMeetings: pluginData.suppressMeetings ?? true
 
-    // BUGFIX: was `isDaemonInstance: pluginRoot.parent !== null` — fragile,
-    // unsupported (Loader reparenting accident, not a framework contract).
-    // Replaced with a global-var mutex so exactly ONE instance drives the
-    // timer/break logic regardless of how the framework instantiates surfaces.
+    // Only the elected instance drives the shared timer state.
     property bool isActiveInstance: false
 
     property int nextBreakType: 0 // 0 for none, 1 for short, 2 for long
@@ -405,7 +402,7 @@ PluginComponent {
     }
 
     Component.onCompleted: {
-        // Elect exactly one active instance via global-var mutex.
+        // Elect one owner for the shared timer state.
         if (pluginId !== "" && !PluginService.getGlobalVar(pluginId, "instance")) {
             PluginService.setGlobalVar(pluginId, "instance", pluginRoot);
             pluginRoot.isActiveInstance = true;
