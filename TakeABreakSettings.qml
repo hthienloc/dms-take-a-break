@@ -184,6 +184,35 @@ PluginSettings {
 
     SettingsCard {
         SectionTitle {
+            text: I18n.tr("Activity Detection")
+            icon: "touch_app"
+        }
+
+        ToggleSettingPlus {
+            id: countOnlyActiveUse
+            settingKey: "countOnlyActiveUse"
+            label: I18n.tr("Only Count Active Use")
+            description: I18n.tr("Pause the countdown to your next break while you're away from the keyboard and mouse. Fullscreen video still counts as active.")
+            defaultValue: true
+        }
+
+        SettingsDivider {}
+
+        SliderSettingPlus {
+            settingKey: "activityIdleThreshold"
+            label: I18n.tr("Idle Threshold")
+            description: I18n.tr("How long without input before you're considered away.")
+            defaultValue: 30
+            minimum: 10
+            maximum: 120
+            unit: "s"
+            leftLabel: "10s"
+            rightLabel: "120s"
+        }
+    }
+
+    SettingsCard {
+        SectionTitle {
             text: I18n.tr("Smart Suppression")
             icon: "psychology"
         }

@@ -27,6 +27,14 @@ PluginComponent {
     property bool suppressFullscreen: pluginData.suppressFullscreen ?? true
     property bool suppressMeetings: pluginData.suppressMeetings ?? true
 
+    // Only count time toward the next break while the seat is actually
+    // active. IdleMonitor (ext-idle-notify-v1) with respectInhibitors true
+    // also stays "active" while any app holds an idle-inhibit lock, which is
+    // how fullscreen video players already keep the screen from blanking —
+    // so this covers "watching a video" for free, no MPRIS check needed.
+    property bool countOnlyActiveUse: pluginData.countOnlyActiveUse ?? true
+    property int activityIdleThreshold: pluginData.activityIdleThreshold ?? 30 // seconds
+
     // Only the elected instance drives the shared timer state.
     property bool isActiveInstance: false
 
@@ -364,12 +372,21 @@ PluginComponent {
         alertPlayer.play();
     }
 
+    // Idle detection for countOnlyActiveUse. respectInhibitors:true means
+    // an idle-inhibit holder (fullscreen video, etc.) keeps isIdle false.
+    IdleMonitor {
+        id: activityIdleMonitor
+        timeout: pluginRoot.activityIdleThreshold
+        respectInhibitors: true
+    }
+
     // Timers
     Timer {
         id: sessionTimer
         interval: 1000
         repeat: true
         running: isActiveInstance && !pluginRoot.isBreakActive && !pluginRoot.isPaused
+            && (!pluginRoot.countOnlyActiveUse || !activityIdleMonitor.isIdle)
         onTriggered: {
             pluginRoot.timeToNextBreak -= 1;
             
